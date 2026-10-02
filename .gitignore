@@ -85,3 +85,7 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# 本地开发一键复位的运行状态（快照、令牌、断点状态、日志）
+.dev-reset/
+**/.dev-reset/

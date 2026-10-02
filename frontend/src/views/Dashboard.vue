@@ -29,7 +29,7 @@
       </tbody>
     </table>
     <footer class="page-foot">
-      <span>数据保存在本机浏览器里，换浏览器或清缓存会回到示例数据</span>
+      <span>数据保存在本机浏览器里；本地开发跑 npm run dev:reset 可一键复位回示例数据</span>
     </footer>
   </section>
 </template>

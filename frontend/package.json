@@ -6,6 +6,8 @@
   "repoKind": "frontend-only",
   "scripts": {
     "dev": "vite",
+    "dev:reset": "node scripts/dev-reset.mjs",
+    "reset:local": "node scripts/dev-reset.mjs --arm-only",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"

@@ -14,9 +14,11 @@
 ├── frontend/                 Vue 3 + Vite + TypeScript 前端（唯一运行单元）
 │   ├── src/views/            每个业务模块一个页面
 │   ├── src/api/local-service.ts   本地数据服务：列表、筛选、动作流转、导出
-│   ├── src/data/             模块元数据 / 示例数据 / localStorage 持久化
+│   ├── src/data/             模块元数据 / 示例数据(seed.json) / localStorage 持久化
+│   ├── src/dev-reset.ts      开发模式启动钩子：待复位时整库覆盖回示例快照
+│   ├── scripts/dev-reset.mjs 一键复位脚本：查依赖、生成校验快照、置位、起复位模式服务
 │   ├── src/stores/           会话与筛选状态
-│   └── vite.config.ts        dev server 配置（open: false，无 /api 代理）
+│   └── vite.config.ts        dev server 配置（open: false，无 /api 代理，含开发复位中间件）
 ├── .gitignore
 └── docker-compose.yml
 ```
@@ -37,6 +39,32 @@ npm run dev
 cd frontend
 npm run build
 ```
+
+## 一键复位本地开发数据
+
+换班、换人或想回到干净示例数据时，不用再手工清浏览器缓存，一条命令即可：
+
+```bash
+# 任选其一（在仓库根目录或 frontend/ 下都行）
+make reset          # 仓库根目录
+cd frontend && npm run dev:reset
+```
+
+命令会按顺序完成：检查运行依赖 → 由 `src/data/seed.json` 生成并校验示例快照 →
+置位复位令牌 → 以「复位模式」启动 dev server。**打开页面时，浏览器 localStorage 里
+`archaeology-field:entries` 整库覆盖回示例数据**：样品封装的封装记录、存放位置，以及其余
+17 个模块的清单和运营概览看板全部同步回到初始状态。
+
+说明：
+
+- 同一轮 dev server 内刷新页面只复位一次，方便复位后继续调试；再次跑 `npm run dev:reset`
+  会换发新令牌，下一次打开重新复位。普通 `npm run dev` 不触发复位。
+- 复位是「整库覆盖」而不是按模块追加，脚本反复装载条目也不会变多（始终 18 个模块 / 54 条）。
+- 支持断点续跑：每步结果记在 `frontend/.dev-reset/state.json`，中途失败后重跑只补未完成的步骤；
+- 全程写日志到 `frontend/.dev-reset/reset.log`，失败的步骤会落日志。
+- 只想置位、稍后自己起服务：`npm run reset:local`（脚本会打印随后该用的启动命令）。
+- 缺依赖时脚本不擅自安装，会直接提示该跑哪条命令（通常是 `cd frontend && npm install`）。
+- 所有路径都基于脚本自身位置推导，不写死本机绝对路径，换台机器克隆即可跑（需 Node 18+）。
 
 ## 业务模块
 
@@ -68,4 +96,5 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
-- 想回到初始数据：清掉浏览器里 `archaeology-field:entries` 这一项，或调用 `resetModule(模块)`。
+- 想回到初始数据：本地开发用一键命令 `npm run dev:reset`（见上文「一键复位本地开发数据」）；
+  浏览器里也可清掉 `archaeology-field:entries` 这一项，或调用 `resetModule(模块)` 只复位单个模块。
