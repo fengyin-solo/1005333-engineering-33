@@ -1,10 +1,12 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { devResetPlugin } from './plugins/dev-reset-plugin'
 
 // 纯前端应用：没有后端，也就没有 /api 代理，数据全部走 src/api/local-service.ts。
 export default defineConfig({
-  plugins: [vue()],
+  // devResetPlugin 内部 apply: 'serve'，只在本地开发服务器挂载，不会进生产构建。
+  plugins: [vue(), devResetPlugin()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

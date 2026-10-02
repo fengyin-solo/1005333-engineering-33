@@ -85,3 +85,6 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# 一键复位脚本的运行期产物（步骤状态与日志，换机器可重新生成）
+.dev-reset/

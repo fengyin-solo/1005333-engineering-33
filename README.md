@@ -16,6 +16,8 @@
 │   ├── src/api/local-service.ts   本地数据服务：列表、筛选、动作流转、导出
 │   ├── src/data/             模块元数据 / 示例数据 / localStorage 持久化
 │   ├── src/stores/           会话与筛选状态
+│   ├── scripts/reset-dev.mjs 一键复位脚本（npm run reset:dev）
+│   ├── plugins/              仅开发环境生效的 Vite 插件（复位页与状态接口）
 │   └── vite.config.ts        dev server 配置（open: false，无 /api 代理）
 ├── .gitignore
 └── docker-compose.yml
@@ -37,6 +39,30 @@ npm run dev
 cd frontend
 npm run build
 ```
+
+## 本地开发数据一键复位
+
+本地开发时数据持久化在浏览器 `localStorage`，上一轮跑出来的封装记录、存放位置等
+改动会一直留着，换人/换轮次看到的就是脏数据。一键复位把全部模块（含样品封装）的
+本地存储整体恢复成 `seed.ts` 示例数据，其他模块清单也同步回到初始状态：
+
+```bash
+make reset-dev
+# 或
+cd frontend && npm run reset:dev
+```
+
+脚本会依次完成（任一步失败可直接重跑，只补未完成的步骤）：
+
+1. **依赖检查**：核对 `node_modules` 是否装齐；缺依赖会直接提示执行 `npm install`。
+2. **拉起 dev server**：已在运行就复用，没运行自动在后台拉起（不写死本机路径，换机器可直接跑）。
+3. **执行复位**：自动打开复位页，把 `archaeology-field:entries` 整体覆盖为示例数据并逐条校验，
+   各模块条数通过后自动跳回首页。复位是「整体覆盖」而不是合并，反复执行条目不会增多。
+
+没有图形界面/浏览器无法自动打开时，终端会打印复位页地址，手工在浏览器打开即可，
+之后重跑命令即可拿到结果。执行过程（含失败原因）记录在 `frontend/.dev-reset/reset.log`，
+步骤状态在 `frontend/.dev-reset/state.json`（均已 gitignore）。可用
+`RESET_TIMEOUT_MS=毫秒数` 调整等待浏览器回传的超时时间。
 
 ## 业务模块
 
@@ -68,4 +94,5 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
-- 想回到初始数据：清掉浏览器里 `archaeology-field:entries` 这一项，或调用 `resetModule(模块)`。
+- 想回到初始数据：运行 `npm run reset:dev`（推荐，一键复位全部模块）；
+  也可以清掉浏览器里 `archaeology-field:entries` 这一项，或调用 `resetModule(模块)` 只复位单个模块。
